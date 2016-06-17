@@ -8,7 +8,10 @@
   :name hk.molloy.ClojureInterpreter
   :extends org.apache.zeppelin.interpreter.Interpreter)
 
-(def spark-context nil)
+(def interpreter nil)
+
+(defmacro scala [s]
+  `(some-> interpreter .interpreter (.valueOfTerm (str '~s)) .get))
 
 (defn -open [this]
   (println "opening"))
@@ -17,9 +20,21 @@
   (println "closing"))
 
 (defn -interpret [this st context]
-  (if (nil? spark-context)
-    (def spark-context context))
-  (InterpreterResult. InterpreterResult$Code/SUCCESS (str (load-string st))))
+  (when (and (nil? interpreter) (try (eval 'org.apache.zeppelin.spark.SparkInterpreter) (catch Exception e)))
+    (def interpreter
+      ((eval
+         '(fn [this]
+            (let [
+                   interpreter-field
+                   (doto (.getDeclaredField org.apache.zeppelin.spark.SparkInterpreter "interpreter")
+                     (.setAccessible true))
+                   ]
+              (.get interpreter-field
+                    (some #(if (instance? org.apache.zeppelin.spark.SparkInterpreter %) %)
+                          (map #(-> % .getInnerInterpreter .getInnerInterpreter)
+                               (.getInterpreterGroup this))))))) this)))
+
+  (InterpreterResult. InterpreterResult$Code/SUCCESS (pr-str (load-string st))))
 
 (defn -cancel [this context]
   (println "cancelling"))

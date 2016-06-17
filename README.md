@@ -4,7 +4,7 @@ Simple Zeppelin Interpreter for Clojure.  I built this because the other solutio
 
 ## Installation
 
-First use ```mvn install:install-file``` to add zeppelin-interpreter-VERSION-XXX.jar to your local repository.
+Clone zeppelin source and install dependencies for this project.
 
 ```bash
 
@@ -21,6 +21,10 @@ Start zeppelin and click interpreter.  You should see something like
 spark %spark (default) , %pyspark , %sql , %dep , %clojure
 
 Yeehah!
+
+## Issues
+
+At present the Spark Interpreter must be invoked at least once before the clojure interpreter.  It is not known why.
 
 ## License
 

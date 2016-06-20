@@ -11,7 +11,10 @@
 (def interpreter nil)
 
 (defmacro scala [s]
-  `(some-> interpreter .interpreter (.valueOfTerm (str '~s)) .get))
+  `(some-> interpreter .interpreter (.valueOfTerm ~(str s)) .get))
+
+(defmacro bind [k v]
+  `(-> my-zeppelin-clj.core/interpreter .interpreter (.bind ~(str k) "Object" ~v scala.collection.immutable.Nil$/MODULE$)))
 
 (defn -open [this]
   (println "opening"))

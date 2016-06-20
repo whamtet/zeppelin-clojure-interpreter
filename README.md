@@ -22,6 +22,15 @@ spark %spark (default) , %pyspark , %sql , %dep , %clojure
 
 Yeehah!
 
+## Interop
+
+The clojure interpreter can interop with the scala interpreter as follows
+
+```clojure
+(my-zeppelin-clj.core/scala val-defined-in-scala) ;;gets the val
+(my-zeppelin-clj.core/bind val_name val) ;;binds val to val_name in the scala interpreter
+```
+
 ## Issues
 
 At present the Spark Interpreter must be invoked at least once before the clojure interpreter.  It is not known why.

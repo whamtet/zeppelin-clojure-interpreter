@@ -15,8 +15,8 @@
 (defmacro scala [s]
   `(some-> interpreter .interpreter (.valueOfTerm ~(str s)) .get))
 
-(defmacro bind [k v]
-  `(-> my-zeppelin-clj.core/interpreter .interpreter (.bind ~(str k) "Object" ~v scala.collection.immutable.Nil$/MODULE$)))
+(defmacro bind [k type v]
+  `(-> my-zeppelin-clj.core/interpreter .interpreter (.bind ~(str k) ~type ~v scala.collection.immutable.Nil$/MODULE$)))
 
 (defn show-df [df limit]
   (show-df2 (scala sc) (.getInterpreterContext zeppelin-context) df limit))

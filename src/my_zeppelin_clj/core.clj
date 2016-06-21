@@ -9,12 +9,17 @@
   :extends org.apache.zeppelin.interpreter.Interpreter)
 
 (def interpreter nil)
+(def zeppelin-context nil)
+(def show-df2 nil)
 
 (defmacro scala [s]
   `(some-> interpreter .interpreter (.valueOfTerm ~(str s)) .get))
 
 (defmacro bind [k v]
   `(-> my-zeppelin-clj.core/interpreter .interpreter (.bind ~(str k) "Object" ~v scala.collection.immutable.Nil$/MODULE$)))
+
+(defn show-df [df limit]
+  (show-df2 (scala sc) (.getInterpreterContext zeppelin-context) df limit))
 
 (defn -open [this]
   (println "opening"))
@@ -35,9 +40,22 @@
               (.get interpreter-field
                     (some #(if (instance? org.apache.zeppelin.spark.SparkInterpreter %) %)
                           (map #(-> % .getInnerInterpreter .getInnerInterpreter)
-                               (.getInterpreterGroup this))))))) this)))
-
-  (InterpreterResult. InterpreterResult$Code/SUCCESS (pr-str (load-string st))))
+                               (.getInterpreterGroup this))))))) this))
+    (def zeppelin-context (scala z))
+    (def show-df2
+      (eval
+        '(fn [sc ic df limit]
+           (org.apache.zeppelin.spark.ZeppelinContext/showDF sc ic df limit))))
+    )
+  (when zeppelin-context
+    (.setInterpreterContext zeppelin-context context))
+  (let [
+         result (load-string st)
+         result (if (and (string? result) (.startsWith result "%table"))
+                  result
+                  (pr-str result))
+         ]
+    (InterpreterResult. InterpreterResult$Code/SUCCESS result)))
 
 (defn -cancel [this context]
   (println "cancelling"))

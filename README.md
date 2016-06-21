@@ -31,6 +31,12 @@ The clojure interpreter can interop with the scala interpreter as follows
 (my-zeppelin-clj.core/bind val_name val) ;;binds val to val_name in the scala interpreter
 ```
 
+To show a dataframe (equivalent to z.show in scala)
+
+```clojure
+(my-zeppelin-clj.core/show-df my-df)
+```
+
 ## Issues
 
 At present the Spark Interpreter must be invoked at least once before the clojure interpreter.  It is not known why.

@@ -50,7 +50,7 @@
   (when zeppelin-context
     (.setInterpreterContext zeppelin-context context))
   (let [
-         result (load-string st)
+         result (load-string (format "(ns user) (use '[my-zeppelin-clj.core :only [scala bind show-df]]) %s" st))
          result (if (and (string? result) (.startsWith result "%table"))
                   result
                   (pr-str result))

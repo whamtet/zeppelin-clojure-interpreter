@@ -27,14 +27,14 @@ Yeehah!
 The clojure interpreter can interop with the scala interpreter as follows
 
 ```clojure
-(my-zeppelin-clj.core/scala val_defined_in_scala) ;;gets the val
-(my-zeppelin-clj.core/bind "val_name" "com.mycompany.MyClass" val) ;;binds val to val_name in the scala interpreter
+(scala val_defined_in_scala) ;;gets the val
+(bind "val_name" "com.mycompany.MyClass" val) ;;binds val to val_name in the scala interpreter
 ```
 
 To show a dataframe (equivalent to z.show in scala)
 
 ```clojure
-(my-zeppelin-clj.core/show-df my-df)
+(show-df my-df num-of-rows)
 ```
 
 ## Issues

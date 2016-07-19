@@ -29,18 +29,25 @@
 
 (defn -interpret [this st context]
   (when (and (nil? interpreter) (try (eval 'org.apache.zeppelin.spark.SparkInterpreter) (catch Exception e)))
+    (def my-this this)
     (def interpreter
       ((eval
          '(fn [this]
-            (let [
-                   interpreter-field
-                   (doto (.getDeclaredField org.apache.zeppelin.spark.SparkInterpreter "interpreter")
-                     (.setAccessible true))
-                   ]
-              (.get interpreter-field
-                    (some #(if (instance? org.apache.zeppelin.spark.SparkInterpreter %) %)
-                          (map #(-> % .getInnerInterpreter .getInnerInterpreter)
-                               (.getInterpreterGroup this))))))) this))
+            (try
+              (let [
+                     interpreter-field
+                     (doto (.getDeclaredField org.apache.zeppelin.spark.SparkInterpreter "interpreter")
+                       (.setAccessible true))
+                     interpreter-group (.getInterpreterGroup this)
+                     interpreter-group (try (get interpreter-group "shared_session" interpreter-group) (catch Exception e interpreter-group))
+                     inner-interpreter (fn [x] (if (instance? org.apache.zeppelin.interpreter.WrappedInterpreter x) (recur (.getInnerInterpreter x)) x))
+                     ]
+                (.get interpreter-field
+                      (some #(if (instance? org.apache.zeppelin.spark.SparkInterpreter %) %)
+                            (map inner-interpreter
+                                 interpreter-group))))
+              (catch Exception e e))
+            )) this))
     (def zeppelin-context (scala z))
     (def show-df2
       (eval

@@ -16,6 +16,8 @@ cp ~/Downloads/clojure-1.8.0.jar $ZEPPELIN_HOME/interpreter/spark
 
 Add hk.molloy.ClojureInterpreter to the zeppelin.interpreters property in ```$ZEPPELIN_HOME/conf/zeppelin-site.xml```
 
+Depending on your configuration, you may have to add clojure-1.8.0.jar to your classpath as well.
+
 Start zeppelin and click interpreter.  You should see something like
 
 spark %spark (default) , %pyspark , %sql , %dep , %clojure

@@ -27,6 +27,28 @@
 (defn -close [this]
   (println "closing"))
 
+(import [org.apache.spark.sql.types StructType StructField LongType DoubleType StringType Metadata])
+(import scala.collection.immutable.Map$)
+(import [org.apache.spark.sql Row$])
+
+(defn struct-type [x]
+(cond
+(integer? x) (LongType.)
+(number? x) (DoubleType.)
+:default (StringType.)))
+
+(defn struct-field [name value]
+(StructField. name (struct-type value) true (Metadata. (.empty Map$/MODULE$))))
+
+(defn schema [names values]
+(StructType. (into-array (map struct-field names values))))
+
+(defn row [x]
+(->> x scala.collection.JavaConversions/asScalaBuffer .toList (.fromSeq Row$/MODULE$)))
+
+(defn df [names rows]
+(.createDataFrame (scala sqlContext) (map row rows) (schema names (first rows))))
+
 (defn -interpret [this st context]
   (when (and (nil? interpreter) (try (eval 'org.apache.zeppelin.spark.SparkInterpreter) (catch Exception e)))
     (def my-this this)
@@ -44,8 +66,7 @@
                      ]
                 (.get interpreter-field
                       (some #(if (instance? org.apache.zeppelin.spark.SparkInterpreter %) %)
-                            (map inner-interpreter
-                                 interpreter-group))))
+                            (map inner-interpreter interpreter-group))))
               (catch Exception e e))
             )) this))
     (def zeppelin-context (scala z))
@@ -57,7 +78,7 @@
   (when zeppelin-context
     (.setInterpreterContext zeppelin-context context))
   (let [
-         result (load-string (format "(ns user) (use '[my-zeppelin-clj.core :only [scala bind show-df]]) %s" st))
+         result (load-string (format "(ns user) (use '[my-zeppelin-clj.core :only [scala bind show-df df]]) %s" st))
          result (if (and (string? result) (.startsWith result "%table"))
                   result
                   (pr-str result))
